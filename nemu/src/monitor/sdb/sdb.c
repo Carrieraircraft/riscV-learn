@@ -54,14 +54,11 @@ static int cmd_si(char *args) {
   if (arg == NULL) {
     /* no argument given */
     cpu_exec(1);
-    return 0;
   }else {
-  {
     cpu_exec(i);
     return 0;
   }
-  }
-
+return 0;
 }
 
 static int cmd_q(char *args) { return -1; }
