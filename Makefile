@@ -1,5 +1,5 @@
-STUID = 221220000
-STUNAME = 张三
+STUID = 0814808
+STUNAME = 航母型飞机
 
 # DO NOT modify the following code!!!
 
