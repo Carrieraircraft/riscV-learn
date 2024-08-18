@@ -14,6 +14,7 @@
  ***************************************************************************************/
 
 #include "sdb.h"
+#include <stdlib.h>
 #include <cpu/cpu.h>
 #include <isa.h>
 #include <readline/history.h>
@@ -50,15 +51,14 @@ static int cmd_c(char *args) {
 
 static int cmd_si(char *args) {
   char *arg = strtok(NULL, " ");
-  int i = *arg;
   if (arg == NULL) {
     /* no argument given */
     cpu_exec(1);
-  }else {
-    cpu_exec(i);
-    return 0;
+  } else {
+    int step = atoi(arg);
+    cpu_exec(step);
   }
-return 0;
+  return 0;
 }
 
 static int cmd_q(char *args) { return -1; }
@@ -73,7 +73,10 @@ static struct {
     {"help", "Display information about all supported commands", cmd_help},
     {"c", "Continue the execution of the program", cmd_c},
     {"q", "Exit NEMU", cmd_q},
-    {"si","Allow the program to pause execution after executing N instructions in single step,Default to 1 when N is not given.",cmd_si}
+    {"si",
+     "Allow the program to pause execution after executing N instructions in "
+     "single step,Default to 1 when N is not given.",
+     cmd_si}
 
     /* TODO: Add more commands */
 
