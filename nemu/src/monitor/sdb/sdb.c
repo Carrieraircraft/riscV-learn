@@ -14,11 +14,11 @@
  ***************************************************************************************/
 
 #include "sdb.h"
-#include <stdlib.h>
 #include <cpu/cpu.h>
 #include <isa.h>
 #include <readline/history.h>
 #include <readline/readline.h>
+#include <stdlib.h>
 
 static int is_batch_mode = false;
 
@@ -49,21 +49,14 @@ static int cmd_c(char *args) {
   return 0;
 }
 
-static int cmd_si(char *args) {
-  char *arg = strtok(NULL, " ");
-  if (arg == NULL) {
-    /* no argument given */
-    cpu_exec(1);
-  } else {
-    int step = atoi(arg);
-    cpu_exec(step);
-  }
-  return 0;
-}
+
+
 
 static int cmd_q(char *args) { return -1; }
 
 static int cmd_help(char *args);
+static int cmd_si(char *args);
+static int cmd_info(char *args);
 
 static struct {
   const char *name;
@@ -76,14 +69,16 @@ static struct {
     {"si",
      "Allow the program to pause execution after executing N instructions in "
      "single step,Default to 1 when N is not given.",
-     cmd_si}
+     cmd_si},
+    {"info", "Printing program status", cmd_info}}
 
-    /* TODO: Add more commands */
-
-};
+/* TODO: Add more commands */
+}
+;
 
 #define NR_CMD ARRLEN(cmd_table)
 
+//帮助命令的实现
 static int cmd_help(char *args) {
   /* extract the first argument */
   char *arg = strtok(NULL, " ");
@@ -105,6 +100,25 @@ static int cmd_help(char *args) {
   }
   return 0;
 }
+
+//单步执行或指定步数执行指令的实现
+static int cmd_si(char *args) {
+  char *arg = strtok(NULL, " ");
+  if (arg == NULL) {
+    /* no argument given */
+    cpu_exec(1);
+  } else {
+    int step = atoi(arg);
+    cpu_exec(step);
+  }
+  return 0;
+}
+
+//打印程序状态的实现，info r打印寄存器状态，info w 打印监视点信息
+static int cmd_info(char *args){
+  return 0;
+}
+
 
 void sdb_set_batch_mode() { is_batch_mode = true; }
 
