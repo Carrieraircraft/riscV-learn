@@ -20,6 +20,7 @@
 #include <readline/readline.h>
 #include <stdlib.h>
 #include <string.h>
+#include "memory/vaddr.h"
 
 static int is_batch_mode = false;
 
@@ -50,14 +51,12 @@ static int cmd_c(char *args) {
   return 0;
 }
 
-
-
-
 static int cmd_q(char *args) { return -1; }
 
 static int cmd_help(char *args);
 static int cmd_si(char *args);
 static int cmd_info(char *args);
+static int cmd_x(char *args);
 
 static struct {
   const char *name;
@@ -67,18 +66,16 @@ static struct {
     {"help", "Display information about all supported commands", cmd_help},
     {"c", "Continue the execution of the program", cmd_c},
     {"q", "Exit NEMU", cmd_q},
-    {"si",
-     "Allow the program to pause execution after executing N instructions in "
-     "single step,Default to 1 when N is not given.",
-     cmd_si},
-    {"info", "Printing program status", cmd_info}}
+    {"si", "Execuate next [N] lines commands", cmd_si},
+    {"info", "Print reg infos with SUBCMD r/w", cmd_info},
+    {"x", "Scan next [N] address and output as HEX.", cmd_x},
 
-/* TODO: Add more commands */
-;
+    /* TODO: Add more commands */
+};
 
 #define NR_CMD ARRLEN(cmd_table)
 
-//帮助命令的实现
+// 帮助命令的实现
 static int cmd_help(char *args) {
   /* extract the first argument */
   char *arg = strtok(NULL, " ");
@@ -101,33 +98,54 @@ static int cmd_help(char *args) {
   return 0;
 }
 
-//单步执行或指定步数执行指令的实现
+// 单步执行或指定步数执行指令的实现
 static int cmd_si(char *args) {
   char *arg = strtok(NULL, " ");
   if (arg == NULL) {
     /* no argument given */
+    printf("Execuate in default value of 1 line command.\n");
     cpu_exec(1);
   } else {
-    int step = atoi(arg);
-    cpu_exec(step);
+    printf("Execuate '%s' lines commands.\n", arg);
+    cpu_exec(atoi(arg));
   }
   return 0;
 }
 
-//打印程序状态的实现，info r打印寄存器状态，info w 打印监视点信息
-static int cmd_info(char *args){
+// 打印程序状态的实现，info r打印寄存器状态，info w 打印监视点信息
+static int cmd_info(char *args) {
   char *arg = strtok(NULL, " ");
-  if(arg == NULL)
-  {
+  if (arg == NULL) {
+    printf("Unknown command, SUBCMD is necessary.\n");
     return 0;
+  } else {
+    if (strcmp(arg, "r") == 0) {
+      isa_reg_display();
+    }
+    if (strcmp(args, "w") == 0) {
+      // sdb_watchpoint_display();
+    }
   }
-  if(strcmp(arg, "r") == 0)
-  {
-    isa_reg_display();
-  }
+
   return 0;
 }
 
+/* if use 'x' or 'x [N]', then core dumped
+ * show bug path: scripts/native.mk:38 run */
+/* And most people use paddr_read() rather than vappr_read()*/
+static int cmd_x(char *args) {
+  if (args == NULL) {
+    printf("Unknown command, input as the form of 'x N EXPR'.\n");
+  }
+  int N = 0;
+  vaddr_t address = 0;
+  sscanf(args, "%d %x", &N, &address); // & trans unsigned int* to vaddr_t
+  for (int i = 0; i < N; i++) {
+    printf("%x\n", vaddr_read(address, 4));
+    address = address + 4;
+  }
+  return 0;
+}
 
 void sdb_set_batch_mode() { is_batch_mode = true; }
 
