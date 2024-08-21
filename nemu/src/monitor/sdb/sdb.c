@@ -19,6 +19,7 @@
 #include <readline/history.h>
 #include <readline/readline.h>
 #include <stdlib.h>
+#include <string.h>
 
 static int is_batch_mode = false;
 
@@ -73,7 +74,6 @@ static struct {
     {"info", "Printing program status", cmd_info}}
 
 /* TODO: Add more commands */
-}
 ;
 
 #define NR_CMD ARRLEN(cmd_table)
@@ -116,6 +116,15 @@ static int cmd_si(char *args) {
 
 //打印程序状态的实现，info r打印寄存器状态，info w 打印监视点信息
 static int cmd_info(char *args){
+  char *arg = strtok(NULL, " ");
+  if(arg == NULL)
+  {
+    return 0;
+  }
+  if(strcmp(arg, "r") == 0)
+  {
+    isa_reg_display();
+  }
   return 0;
 }
 
