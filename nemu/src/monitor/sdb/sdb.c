@@ -18,9 +18,7 @@
 #include <isa.h>
 #include <readline/history.h>
 #include <readline/readline.h>
-#include <stdlib.h>
-#include <string.h>
-#include "memory/vaddr.h"
+#include <memory/paddr.h>
 
 static int is_batch_mode = false;
 
@@ -134,16 +132,6 @@ static int cmd_info(char *args) {
  * show bug path: scripts/native.mk:38 run */
 /* And most people use paddr_read() rather than vappr_read()*/
 static int cmd_x(char *args) {
-  if (args == NULL) {
-    printf("Unknown command, input as the form of 'x N EXPR'.\n");
-  }
-  int N = 0;
-  vaddr_t address = 0;
-  sscanf(args, "%d %x", &N, &address); // & trans unsigned int* to vaddr_t
-  for (int i = 0; i < N; i++) {
-    printf("%x\n", vaddr_read(address, 4));
-    address = address + 4;
-  }
   return 0;
 }
 
