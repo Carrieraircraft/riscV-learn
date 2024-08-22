@@ -16,9 +16,9 @@
 #include "sdb.h"
 #include <cpu/cpu.h>
 #include <isa.h>
+#include <memory/vaddr.h>
 #include <readline/history.h>
 #include <readline/readline.h>
-#include <memory/paddr.h>
 
 static int is_batch_mode = false;
 
@@ -132,6 +132,28 @@ static int cmd_info(char *args) {
  * show bug path: scripts/native.mk:38 run */
 /* And most people use paddr_read() rather than vappr_read()*/
 static int cmd_x(char *args) {
+  char *cnt_str = strtok(NULL, " ");
+  if (cnt_str != NULL) {
+    int cnt = atoi(cnt_str);
+
+    char *addr_str = strtok(NULL, " ");
+    if (addr_str != NULL) {
+      if (strlen(addr_str) >= 2 && addr_str[0] == '0' && addr_str[1] == 'x') {
+        int addr = (int)strtol(addr_str + 2, NULL, 16);
+        printf("%-14s%-28s%-s\n", "Address", "Hexadecimal", "Decimal");
+        for (int i = 0; i < cnt; ++i) {
+          printf("0x%-12x0x%02x  0x%02x  0x%02x  0x%02x", (addr),
+                 vaddr_read(addr, 1), vaddr_read(addr + 1, 1),
+                 vaddr_read(addr + 2, 1), vaddr_read(addr + 3, 1));
+          printf("\t  %04d  %04d  %04d  %04d\n", vaddr_read(addr, 1),
+                 vaddr_read(addr + 1, 1), vaddr_read(addr + 2, 1),
+                 vaddr_read(addr + 3, 1));
+          addr += 4;
+        }
+      } else
+        printf("the result of the given expression is NOT hexadecimal!");
+    }
+  }
   return 0;
 }
 
